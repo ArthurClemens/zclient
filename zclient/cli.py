@@ -21,9 +21,9 @@ class CLIController(object):
     def do_list(self):
         self.registry.showAll()
 
-    def do_add_app(self, id, hostname, ckey, csec):
+    def do_add_app(self, id, hostname, ckey, csec, ssl=False):
         try:
-            self.registry.addApp(id, hostname, ckey, csec)
+            self.registry.addApp(id, hostname, ckey, csec, ssl)
             self.registry.save()
             print("OK")
         except ConfigParser.DuplicateSectionError:

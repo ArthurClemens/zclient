@@ -34,12 +34,13 @@ class ApplicationRegistry (object):
     def getClients(self):
         return [s[7:] for s in self.parser.sections() if s[:7] == "client:"]
 
-    def addApp(self, id, host, ckey, csec):
+    def addApp(self, id, host, ckey, csec, ssl):
         k = 'app:'+id
         self.parser.add_section(k)
         self.parser.set(k, 'host', host)
         self.parser.set(k, 'ckey', ckey)
         self.parser.set(k, 'csec', csec)
+        self.parser.set(k, 'ssl', ssl)
 
     def removeApp(self, id):
         k = 'app:'+id
@@ -110,10 +111,14 @@ class ZotonicClient(oauth.OAuthClient):
             self.app = client_or_app
             self.client = None
 
-        self.request_token_url = 'http://%s/oauth/request_token' % self.app['host']
-        self.authorization_url = 'http://%s/oauth/authorize' % self.app['host']
-        self.access_token_url = 'http://%s/oauth/access_token' % self.app['host']
-        self.connection = httplib.HTTPConnection(self.app['host'])
+
+        ssl = self.app.get('ssl', False)
+        self.protocol = 'https' if ssl else 'http'
+        self.request_token_url = '%s://%s/oauth/request_token' % (self.protocol, self.app['host'])
+        self.authorization_url = '%s://%s/oauth/authorize' % (self.protocol, self.app['host'])
+        self.access_token_url = '%s://%s/oauth/access_token' % (self.protocol, self.app['host'])
+        self.connectionType = httplib.HTTPSConnection if ssl else httplib.HTTPConnection
+        self.connection = self.connectionType(self.app['host'])
         #self.signature_method = oauth.OAuthSignatureMethod_PLAINTEXT()
         self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
         if self.app['ckey']:
@@ -218,9 +223,9 @@ class ZotonicClient(oauth.OAuthClient):
         host = urllib.splithost(urllib.splittype(url)[1])[0]
 
         if sys.version_info >= (2,6) and self.requestTimeout > 0:
-            conn = httplib.HTTPConnection(host, timeout=self.requestTimeout)
+            conn = self.connectionType(host, timeout=self.requestTimeout)
         else:
-            conn = httplib.HTTPConnection(host)
+            conn = self.connectionType(host)
 
         conn.request(http_method, url, body=body, headers=headers)
 
@@ -252,4 +257,4 @@ class ZotonicClient(oauth.OAuthClient):
             encoded_params = "?" + ("&".join(["%s=%s" % (oauth.escape(k), oauth.escape(v)) for k,v in parameters.iteritems()]))
         else:
             encoded_params = ""
-        return 'http://%s/api/%s%s' % (self.app['host'], method, encoded_params)
+        return '%s://%s/api/%s%s' % (self.protocol, self.app['host'], method, encoded_params)

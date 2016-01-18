@@ -10,7 +10,7 @@ keys, secrets and authorized access tokens.
 
     Commands:
 
-      add-app <app id> <hostname> <consumer key> <consumer secret>
+      add-app <app id> <hostname> <consumer key> <consumer secret> <is ssl>
       - adds a new app plus its consumer details
 
       del-app <app id>
@@ -47,12 +47,14 @@ This token/secret pair uniquely identifies your application.
 
 ### 4. Register the app with zclient ###
 
-    zclient add-app someappid 127.0.0.1:8000 <yourconsumerkey> <yourconsumersecret>
+    zclient add-app someappid 127.0.0.1:8000 <yourconsumerkey> <yourconsumersecret> <is ssl>
   
 "*someappid*" is some identifier that you come up with to identify
   this app on the zclient side. For example: `my-mobile-app`.
   Copy-paste the consumer key and secret from the previous step onto
   the command line.
+  
+"*is ssl*": if `True` all connections will use `https` instead of `http`; default `False`
 
 ### 5. Add a client for the app ###
 
