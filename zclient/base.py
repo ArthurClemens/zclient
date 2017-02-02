@@ -119,8 +119,8 @@ class ZotonicClient(oauth.OAuthClient):
         self.access_token_url = '%s://%s/oauth/access_token' % (self.protocol, self.app['host'])
         self.connectionType = httplib.HTTPSConnection if ssl else httplib.HTTPConnection
         self.connection = self.connectionType(self.app['host'])
-        #self.signature_method = oauth.OAuthSignatureMethod_PLAINTEXT()
-        self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
+        self.signature_method = oauth.OAuthSignatureMethod_PLAINTEXT()
+        #self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
         if self.app['ckey']:
             self.consumer = oauth.OAuthConsumer(self.app['ckey'], self.app['csec'])
         else:
